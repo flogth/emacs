@@ -312,23 +312,34 @@
   (:option org-ellipsis " ↴"
            org-highlight-latex-and-related '(latex script entities)
            org-pretty-entities t
+           org-hide-emphasis-markers t
            org-preview-latex-image-directory
            (expand-file-name
             "ltxpng"
             (temporary-file-directory))
-           org-src-window-setup 'current-window)
+           org-src-window-setup 'current-window
+
+           org-return-follows-link t
+           org-mouse-1-follows-link t
+           org-link-descriptive t)
   (:option org-html-doctype "xhtml5"
            org-html-html5-fancy t)
   (:option org-superstar-special-todo-items t
-           org-superstar-leading-bullet ?\s))
+           org-superstar-leading-bullet ?\s)
+  (defconst org-electric-pairs
+    '((?$ . ?$)))
+  (add-hook 'org-mode-hook
+            (defun org-add-electric-pairs ()
+              (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs)
+                          electric-pair-text-pairs electric-pair-pairs)))
+  (defun local/disable<>pairing ()
+    (setq-local electric-pair-inhibit-predicate
+                (lambda (c)
+                  (if (char-equal c ?<) t (electric-pair-inhibit-predicate c)))))
+  (:hook local/disable<>pairing))
 
 
-(defconst org-electric-pairs
-  '((?$ . ?$)))
-(add-hook 'org-mode-hook
-          (defun org-add-electric-pairs ()
-            (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs)
-                        electric-pair-text-pairs electric-pair-pairs)))
+
 
 ;;; programming languages ==================================
 ;; agda
@@ -356,6 +367,7 @@
 ;; apl
 (setup (:package gnu-apl-mode)
   (:option gnu-apl-show-tips-on-start nil))
+
 ;; c/c++
 (setup cc-mode
   (:load-after eglot)
@@ -412,17 +424,16 @@
     (:file-match "\\.js\\'")))
 
 ;; nix
-
 (setup (:package nix-mode)
-       (defconst nix-electric-pairs
-         '(("let" . " in")
-           (?= . ";")))
-       (defun nix-add-electric-pairs ()
-         (setq-local electric-pair-pairs
-                     (append electric-pair-pairs nix-electric-pairs)
-                     electric-pair-text-pairs electric-pair-pairs))
-       (:file-match "\\.nix\\'")
-       (:hook #'nix-add-electric-pairs))
+  (defconst nix-electric-pairs
+    '(("let" . " in")
+      (?= . ";")))
+  (defun nix-add-electric-pairs ()
+    (setq-local electric-pair-pairs
+                (append electric-pair-pairs nix-electric-pairs)
+                electric-pair-text-pairs electric-pair-pairs))
+  (:file-match "\\.nix\\'")
+  (:hook #'nix-add-electric-pairs))
 
 (add-hook 'nix-mode-hook
           (defun nix-add-electric-pairs ()
@@ -654,7 +665,5 @@
    '("'" . repeat)
    '("<escape>" . ignore))
   (meow-global-mode t))
-
-
 
 ;;; init.el ends here
