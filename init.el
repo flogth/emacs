@@ -66,7 +66,8 @@
 
 ;;; ui =====================================================
 
-(set-fringe-mode 10)                    ; add padding to frame
+;; (set-fringe-mode 10)
+					; add padding to frame
 (set! blink-cursor-mode nil)            ; do not blink cursor
 
 ;; theme
@@ -342,116 +343,16 @@
 
 
 ;;; programming languages ==================================
-;; agda
-(defun local/agda-faces ()
-  "Adjust faces for 'agda2-mode'."
-  (mapc
-   (lambda (x) (add-to-list 'face-remapping-alist x))
-   '((agda2-highlight-datatype-face              . font-lock-type-face)
-     (agda2-highlight-function-face              . font-lock-type-face)
-     (agda2-highlight-inductive-constructor-face . font-lock-function-name-face)
-     (agda2-highlight-keyword-face               . font-lock-keyword-face)
-     (agda2-highlight-module-face                . font-lock-constant-face)
-     (agda2-highlight-number-face                . nil)
-     (agda2-highlight-postulate-face             . font-lock-type-face)
-     (agda2-highlight-primitive-type-face        . font-lock-type-face)
-     (agda2-highlight-record-face                . font-lock-type-face))))
-
-(setup agda2-mode
-  (when (executable-find "agda-mode")
-    (load-file (let ((coding-system-for-read 'utf-8))
-                 (shell-command-to-string "agda-mode locate"))))
-  (:hook #'local/disable-aggressive-indent
-         #'local/agda-faces))
-
-;; apl
-(setup (:package gnu-apl-mode)
-  (:option gnu-apl-show-tips-on-start nil))
-
-;; c/c++
-(setup cc-mode
-  (:load-after eglot)
-  (:hook #'eglot-ensure))
-
-;; coq
-(defun local/setup-pg-faces ()
-  "Setup faces for Proof General."
-  ;; thanks david
-  (set-face-background 'proof-locked-face "#90ee90"))
-
-(defun local/coq-init ()
-  "Some initializations for 'coq-mode'."
-  (setq-local tab-width proof-indent))
-
-(setup (:package proof-general)
-  (:option proof-splash-enable nil
-           proof-three-window-enable t
-           proof-three-window-mode-policy 'smart)
-  (:with-mode coq-mode
-    (:hook #'local/setup-pg-faces
-           #'local/coq-init)))
-
-;; lisp
-(setup (:package sly)
-  (:with-mode lisp-mode
-    (:hook #'sly-editing-mode)))
-
-(setup (:package geiser geiser-guile)
-  (:option scheme-program-name "guile"))
-
-(setup (:package racket-mode geiser-racket))
-
 (setup (:package eros)
   (:with-mode emacs-lisp-mode
     (:hook #'eros-mode))
   (:with-mode lisp-mode
     (:hook #'eros-mode)))
 
-;; haskell
-(setup (:package haskell-mode)
-       (:load-after eglot)
-       (:hook #'eglot-ensure
-              #'interactive-haskell-mode)
-       (:option haskell-completing-read-function #'completing-read))
-
-;; java
-(setup antlr-mode
-  (:file-match "\\.g4\\'"))
-
 ;; js
 (setup (:package js2-mode json-mode)
   (:with-mode js2-mode
     (:file-match "\\.js\\'")))
-
-;; nix
-(setup (:package nix-mode)
-  (defconst nix-electric-pairs
-    '(("let" . " in")
-      (?= . ";")))
-  (defun nix-add-electric-pairs ()
-    (setq-local electric-pair-pairs
-                (append electric-pair-pairs nix-electric-pairs)
-                electric-pair-text-pairs electric-pair-pairs))
-  (:file-match "\\.nix\\'")
-  (:hook #'nix-add-electric-pairs))
-
-(add-hook 'nix-mode-hook
-          (defun nix-add-electric-pairs ()
-            (setq-local electric-pair-pairs (append electric-pair-pairs nix-electric-pairs)
-                        electric-pair-text-pairs electric-pair-pairs)))
-
-;; prolog
-(setup (:package prolog ediprolog)
-  (:with-mode prolog
-    (:file-match "\\.pl\\'"))
-  (:option prolog-system 'scryer
-           ediprolog-system 'scryer))
-
-;; rust
-(setup (:package rust-mode cargo)
-  (:load-after eglot)
-  (:with-mode rust-mode
-    (:hook #'eglot-ensure)))
 
 ;;; utilities ==============================================
 
