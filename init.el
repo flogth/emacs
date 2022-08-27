@@ -66,21 +66,30 @@
 
 ;;; ui =====================================================
 
-(set-fringe-mode 10)                    ; add padding to frame
-(set! blink-cursor-mode nil)            ; do not blink cursor
+(set-fringe-mode '(10 . 0))  ; add padding to frame
+(set! blink-cursor-mode nil) ; do not blink cursor
+
+;; some visual niceties
+(set-display-table-slot standard-display-table 'truncation
+                        (make-glyph-code ?…))
+(set-display-table-slot standard-display-table 'wrap
+                        (make-glyph-code ?↩))
+(setq window-divider-default-right-width 3)
+(setq window-divider-default-places 'right-only)
+(window-divider-mode)
 
 ;; theme
 (setup (:package modus-themes)
-       (:option modus-themes-italic-constructs t
-                modus-themes-bold-constructs t
-                modus-themes-region '(accented)
-                modus-themes-mode-line '(accented borderless)
-                modus-themes-tabs-accented t
-                modus-themes-paren-match '(intense bold))
-       (load-theme 'modus-operandi t)
+  (:option modus-themes-italic-constructs t
+           modus-themes-bold-constructs t
+           modus-themes-region '(accented)
+           modus-themes-mode-line '(accented borderless)
+           modus-themes-tabs-accented t
+           modus-themes-paren-match '(intense bold))
+  (load-theme 'modus-operandi t)
 
-       (custom-set-faces
-        '(mode-line ((t (:background "white smoke"))))))
+  (custom-set-faces
+   '(mode-line ((t (:background "white smoke"))))))
 
 ;; font
 (custom-set-faces
@@ -88,7 +97,7 @@
 
 ;; modeline
 (setup (:package mood-line)
-       (mood-line-mode))
+  (mood-line-mode))
 
 (column-number-mode t)
 
@@ -116,7 +125,7 @@
 
 ;; indenting
 (setup (:package aggressive-indent)
-       (:hook-into prog-mode))
+  (:hook-into prog-mode))
 
 ;; editorconfig
 (setup (:package editorconfig)
@@ -134,30 +143,30 @@
 
 ;;; completion =============================================
 (setup (:package vertico)
-       (require 'vertico)
-       (:option vertico-cycle t
-                vertico-resize nil)
-       (vertico-mode))
+  (require 'vertico)
+  (:option vertico-cycle t
+           vertico-resize nil)
+  (vertico-mode))
 
 (setup (:package corfu)
-       (require 'corfu)
-       (:option corfu-auto t
-                corfu-auto-delay 0
-                corfu-preview-current nil
-                corfu-cycle t
-                corfu-echo-documentation 0.25
-                tab-always-indent 'complete)
-       (global-corfu-mode))
+  (require 'corfu)
+  (:option corfu-auto t
+           corfu-auto-delay 0
+           corfu-preview-current nil
+           corfu-cycle t
+           corfu-echo-documentation 0.25
+           tab-always-indent 'complete)
+  (global-corfu-mode))
 
 (setup (:package consult)
-       (:option completion-in-region-function
-                #'consult-completion-in-region))
+  (:option completion-in-region-function
+           #'consult-completion-in-region))
 
 (setup (:package orderless)
-       (:option completion-styles '(orderless basic)))
+  (:option completion-styles '(orderless basic)))
 
 (setup (:package marginalia)
-       (:option marginalia-mode t))
+  (:option marginalia-mode t))
 
 (setup (:package savehist recentf)
   ;; history
@@ -409,10 +418,11 @@
 
 ;; haskell
 (setup (:package haskell-mode)
-       (:load-after eglot)
-       (:hook #'eglot-ensure
-              #'interactive-haskell-mode)
-       (:option haskell-completing-read-function #'completing-read))
+  (:load-after eglot)
+  (:hook #'eglot-ensure
+         #'interactive-haskell-mode
+         #'local/disable-aggressive-indent)
+  (:option haskell-completing-read-function #'completing-read))
 
 ;; java
 (setup antlr-mode
