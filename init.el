@@ -15,6 +15,21 @@
         (setq body `(with-eval-after-load ',feature ,body)))
       body))
   :documentation "Load the current feature after FEATURES.")
+(setup-define :local-or-package
+  (lambda (feature-or-package)
+    `(unless (locate-file ,(symbol-name feature-or-package)
+			              load-path
+			              (get-load-suffixes))
+       (:package ',feature-or-package)))
+  :documentation "Install PACKAGE if it is not available locally.
+This macro can be used as NAME, and it will replace itself with
+the first PACKAGE."
+  :repeatable t
+  :shorthand #'cadr)
+
+;; load local packages
+(let ((default-directory (expand-file-name "lisp" user-emacs-directory)))
+  (normal-top-level-add-subdirs-to-load-path))
 
 (require 'cl-lib)
 
@@ -132,7 +147,9 @@
   (:option editorconfig-mode t))
 
 ;; buffer-env
-(setup buffer-env)
+(setup (:local-or-package buffer-env)
+  (require 'buffer-env)
+  (:option buffer-env-script-name "flake.nix"))
 
 ;; scrolling
 (set! scroll-margin 1
