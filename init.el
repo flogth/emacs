@@ -84,13 +84,17 @@ the first PACKAGE."
 (set-fringe-mode '(10 . 0))  ; add padding to frame
 (set! blink-cursor-mode nil) ; do not blink cursor
 
+(set! display-line-numbers-type 'relative)
+(custom-set-faces
+ '(line-number ((t (:height 0.8)))))
+
 ;; some visual niceties
 (set-display-table-slot standard-display-table 'truncation
                         (make-glyph-code ?…))
 (set-display-table-slot standard-display-table 'wrap
                         (make-glyph-code ?↩))
-(setq window-divider-default-right-width 3)
-(setq window-divider-default-places 'right-only)
+(set! window-divider-default-right-width 3
+      window-divider-default-places 'right-only)
 (window-divider-mode)
 
 ;; theme
