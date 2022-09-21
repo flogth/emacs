@@ -383,26 +383,12 @@ the first PACKAGE."
 
 ;;; programming languages ==================================
 ;; agda
-(defun local/agda-faces ()
-  "Adjust faces for 'agda2-mode'."
-  (mapc
-   (lambda (x) (add-to-list 'face-remapping-alist x))
-   '((agda2-highlight-datatype-face              . font-lock-type-face)
-     (agda2-highlight-function-face              . font-lock-type-face)
-     (agda2-highlight-inductive-constructor-face . font-lock-function-name-face)
-     (agda2-highlight-keyword-face               . font-lock-keyword-face)
-     (agda2-highlight-module-face                . font-lock-constant-face)
-     (agda2-highlight-number-face                . nil)
-     (agda2-highlight-postulate-face             . font-lock-type-face)
-     (agda2-highlight-primitive-type-face        . font-lock-type-face)
-     (agda2-highlight-record-face                . font-lock-type-face))))
-
 (setup agda2-mode
   (when (executable-find "agda-mode")
     (load-file (let ((coding-system-for-read 'utf-8))
                  (shell-command-to-string "agda-mode locate"))))
-  (:hook #'local/disable-aggressive-indent
-         #'local/agda-faces))
+  (:hook #'local/disable-aggressive-indent)
+  (:option agda2-highlight-face-groups 'default-faces))
 
 ;; apl
 (setup (:package gnu-apl-mode)
