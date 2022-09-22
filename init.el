@@ -34,24 +34,9 @@ the first PACKAGE."
 (require 'cl-lib)
 
 (defmacro set! (&rest args)
-  "Customize user options with ARGS like `setq'."
+  "Macro for setting user options.  `setq'-like ARGS."
   (declare (debug setq))
-  `(progn ,@(cl-loop for (name val) on args by #'cddr
-                                        ;if (null val) return (user-error "Not enough arguments")
-                     collecting `(customize-set-variable ',name ,val)
-                     into ret
-                     finally return ret)))
-
-(defmacro defmap! (name &rest bindings )
-  "Define a keymap NAME with defined BINDINGS."
-  `(progn (defvar ,name
-            (let ((keymap (make-keymap)))
-              ,@(cl-loop for (key val) on bindings by #'cddr
-                         collecting `(define-key keymap ,key ,val)
-                         into ret
-                         finally return ret)
-              keymap))
-          (defalias ',name ,name)))
+  `(setup (:option ,@args)))
 
 ;;; basic settings =========================================
 (set! inhibit-startup-message t
@@ -176,8 +161,6 @@ the first PACKAGE."
   (global-corfu-mode))
 
 (setup (:package consult)
-  (:option completion-in-region-function
-           #'consult-completion-in-region)
   (:global [remap switch-to-buffer] #'consult-buffer
            "C-c s" #'consult-line
            "C-c y" #'consult-yank-from-kill-ring))
@@ -484,6 +467,9 @@ the first PACKAGE."
   (:load-after eglot)
   (:with-mode rust-mode
     (:hook #'eglot-ensure)))
+
+;;; config langs ===========================================
+(setup (:package apache-mode))
 
 ;;; utilities ==============================================
 
