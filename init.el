@@ -114,7 +114,8 @@ the first PACKAGE."
 
 ;; insert brackets,parens,... as pairs
 (setup elec-pair
-  (:option electric-pair-mode t))
+  (:option electric-pair-mode t
+           delete-pair-blink-delay 0))
 
 ;; show matching parentheses
 (setup paren
@@ -547,8 +548,32 @@ the first PACKAGE."
   (eshell t))
 
 (defun local/kill-this-buffer ()
+  "Kill the current buffer."
   (interactive)
   (kill-buffer nil))
+
+(defun local/replace-outer-in-region (arg open close)
+  "Wrap region in OPEN and CLOSE.  If ARG is nil, remove the first and last characters in region."
+  (save-excursion
+    (when (< (point) (mark))
+      (exchange-point-and-mark))
+    (unless arg
+      (delete-char -1))
+    (insert-char close)
+    (exchange-point-and-mark)
+    (unless arg
+      (delete-char 1))
+    (insert-char open)))
+
+(defun local/replace-curly (arg)
+  "Wrap region in curly braces.  If ARG is nil, remove the first and last characters in region."
+  (interactive "P")
+  (local/replace-outer-in-region arg ?{ ?}))
+
+(defun local/replace-round (arg)
+  "Wrap region in parentheses.  If ARG is nil, remove the first and last characters in region."
+  (interactive "P")
+  (local/replace-outer-in-region arg ?( ?)))
 
 ;;; registers ==============================================
 
@@ -557,6 +582,9 @@ the first PACKAGE."
 (set-register ?u '(file . "~/data/uni/lv"))
 
 ;;; keybindings ============================================
+
+(global-set-key (kbd "M-{") #'local/replace-curly)
+(global-set-key (kbd "M-(") #'local/replace-round)
 
 (setup (:package meow)
   (require 'meow)
