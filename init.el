@@ -69,7 +69,7 @@ the first PACKAGE."
 (set-fringe-mode '(10 . 0))  ; add padding to frame
 (set! blink-cursor-mode nil) ; do not blink cursor
 
-(set! display-line-numbers-type 'relative)
+(set! display-line-numbers-type t)
 (custom-set-faces
  '(line-number ((t (:height 0.8)))))
 
@@ -552,28 +552,34 @@ the first PACKAGE."
   (interactive)
   (kill-buffer nil))
 
-(defun local/replace-outer-in-region (arg open close)
-  "Wrap region in OPEN and CLOSE.  If ARG is nil, remove the first and last characters in region."
-  (save-excursion
-    (when (< (point) (mark))
-      (exchange-point-and-mark))
-    (unless arg
-      (delete-char -1))
-    (insert-char close)
-    (exchange-point-and-mark)
-    (unless arg
+(defun local/wrap-region (start end c replace)
+  "Wrap region from START to END in (car C) and (cdr c).  If REPLACE is non-nil, replace the first and last characters in region."
+  (save-restriction
+    (narrow-to-region start end)
+    (goto-char (point-min))
+    (when replace
       (delete-char 1))
-    (insert-char open)))
+    (insert-char (car c))
+    (goto-char (point-max))
+    (when replace
+      (delete-char -1))
+    (insert-char (cdr c))))
 
-(defun local/replace-curly (arg)
-  "Wrap region in curly braces.  If ARG is nil, remove the first and last characters in region."
-  (interactive "P")
-  (local/replace-outer-in-region arg ?{ ?}))
+(defun local/replace-round (start end arg)
+  "Wrap region from START to END in parentheses, replacing the first and last characters.  With prefix argument ARG, simply wrap the region."
+  (interactive "*r\nP")
+  (local/wrap-region start end '(?( . ?) ) (not arg)))
 
-(defun local/replace-round (arg)
-  "Wrap region in parentheses.  If ARG is nil, remove the first and last characters in region."
-  (interactive "P")
-  (local/replace-outer-in-region arg ?( ?)))
+(defun local/replace-curly (start end arg)
+  "Wrap region from START to END in curly braces, replacing the first and last characters.  With prefix argument ARG, simply wrap the region."
+  (interactive "*r\nP")
+  (local/wrap-region start end '(?{ . ?} ) (not arg)))
+
+(defun local/replace-square (start end arg)
+  "Wrap region from START to END in square brackets, replacing the first and last characters.  With prefix argument ARG, simply wrap the region."
+  (interactive "*r\nP")
+  (local/wrap-region start end '(?[ . ?] ) (not arg)))
+
 
 ;;; registers ==============================================
 
@@ -583,8 +589,12 @@ the first PACKAGE."
 
 ;;; keybindings ============================================
 
-(global-set-key (kbd "M-{") #'local/replace-curly)
 (global-set-key (kbd "M-(") #'local/replace-round)
+(global-set-key (kbd "M-{") #'local/replace-curly)
+(global-set-key (kbd "M-[") #'local/replace-square)
+(global-set-key (kbd "M-)") #'delete-pair)
+
+
 
 (setup (:package meow)
   (require 'meow)
