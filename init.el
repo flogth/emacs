@@ -69,7 +69,6 @@ the first PACKAGE."
 (set-fringe-mode '(10 . 0))  ; add padding to frame
 (set! blink-cursor-mode nil) ; do not blink cursor
 
-(set! display-line-numbers-type t)
 (custom-set-faces
  '(line-number ((t (:height 0.8)))))
 
@@ -123,10 +122,6 @@ the first PACKAGE."
            show-paren-delay 0
            show-paren-context-when-offscreen t))
 
-;; indenting
-(setup (:package aggressive-indent)
-  (:hook-into prog-mode))
-
 ;; editorconfig
 (setup (:package editorconfig)
   (:option editorconfig-mode t))
@@ -162,8 +157,12 @@ the first PACKAGE."
   (global-corfu-mode))
 
 (setup (:package consult)
+  (require 'consult)
+  ;; disable automatic previews in consult commands
+  (consult-customize consult-register consult-buffer :preview-key (kbd "M-."))
   (:global [remap switch-to-buffer] #'consult-buffer
            "C-c s" #'consult-line
+           "C-c S" #'consult-ripgrep
            "C-c y" #'consult-yank-from-kill-ring))
 
 (setup (:package orderless)
@@ -285,8 +284,7 @@ the first PACKAGE."
          "C-c f" #'eglot-format))
 
 (setup flymake
-  (:with-mode flymake-mode
-    (:hook-into prog-mode)))
+  (:hook-into prog-mode))
 
 (setup xref
   ;; xref
@@ -320,7 +318,8 @@ the first PACKAGE."
                 TeX-view-program-selection '((output-pdf "xdg-open"))
                 TeX-electric-math '("$" . "$")
                 TeX-electric-sub-and-superscript t
-                LaTeX-electric-left-right-brace t))
+                LaTeX-electric-left-right-brace t
+                reftex-plug-into-AUCTeX t))
 
 (setup (:package cdlatex)
   (:with-mode cdlatex
@@ -379,6 +378,7 @@ the first PACKAGE."
   (:option gnu-apl-show-tips-on-start nil))
 
 (setup bqn-mode
+  (require 'bqn-mode)
   (setq bqn-interpreter-path "cbqn"))
 
 ;; c/c++
@@ -586,6 +586,7 @@ the first PACKAGE."
 (set-register ?d '(file . "~/.dotfiles"))
 (set-register ?U '(file . "/ssh:uni:.www/"))
 (set-register ?u '(file . "~/data/uni/lv"))
+(set-register ?b '(file . "/ssh:blog:~"))
 
 ;;; keybindings ============================================
 
@@ -619,7 +620,13 @@ the first PACKAGE."
    '(","   . switch-to-buffer)
    '("TAB" . hs-toggle-hiding)
    '("k" . local/kill-this-buffer)
-   '("r" . consult-register)
+   '("r" . jump-to-register)
+   '("B" . compile)
+   '("b" . recompile)
+   '("wh" . windmove-left)
+   '("wj" . windmove-down)
+   '("wk" . windmove-up)
+   '("wl" . windmove-right)
 
    '("1"   . meow-digit-argument)
    '("2"   . meow-digit-argument)
