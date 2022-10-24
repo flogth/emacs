@@ -471,6 +471,10 @@ the first PACKAGE."
   (:with-mode rust-mode
     (:hook #'eglot-ensure)))
 
+;; ocaml
+(setup (:package tuareg)
+  (:hook #'eglot-ensure))
+
 ;;; config langs ===========================================
 (setup (:package apache-mode))
 
