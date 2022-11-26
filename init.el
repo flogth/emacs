@@ -311,7 +311,6 @@ the first PACKAGE."
                 #'LaTeX-math-mode
                 #'reftex-mode))
        (:option TeX-master 'dwim
-                TeX-engine 'luatex
                 TeX-PDF-mode t
                 TeX-auto-save t
                 TeX-save-query nil
@@ -413,10 +412,9 @@ the first PACKAGE."
 
 (setup (:package racket-mode geiser-racket))
 
-(setup (:package geiser)
+(setup (:package geiser geiser-guile)
   (:hook-into scheme-mode
               racket-mode))
-
 
 (setup (:package eros)
   (:with-mode emacs-lisp-mode
@@ -428,8 +426,7 @@ the first PACKAGE."
 (setup (:package haskell-mode)
   (:load-after eglot)
   (:hook #'eglot-ensure
-         #'interactive-haskell-mode
-         #'local/disable-aggressive-indent)
+         #'interactive-haskell-mode)
   (:option haskell-completing-read-function #'completing-read))
 
 ;; java
@@ -442,13 +439,13 @@ the first PACKAGE."
     (:file-match "\\.js\\'")))
 
 ;; nix
-(setup (:package nix-mode)
+(setup (:package-or-local nix-mode)
   (defconst nix-electric-pairs
     '(("let" . " in")
       (?= . ";")))
   (defun nix-add-electric-pairs ()
-    (setq-local electric-pair-pairs
-                (append electric-pair-pairs nix-electric-pairs)
+    (setq-local electric-pair-pairs (append
+                                     electric-pair-pairs nix-electric-pairs)
                 electric-pair-text-pairs electric-pair-pairs))
   (:file-match "\\.nix\\'")
   (:hook #'nix-add-electric-pairs
@@ -542,11 +539,6 @@ the first PACKAGE."
   "Decrement integer at point."
   (interactive)
   (local/mutate-int-at-point #'1-))
-
-(defun local/disable-aggressive-indent ()
-  "Disable 'aggressive-indent-mode'."
-  (interactive)
-  (aggressive-indent-mode -1))
 
 (defun local/eshell-new()
   "Open a new instance of eshell."
