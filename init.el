@@ -439,7 +439,7 @@ the first PACKAGE."
     (:file-match "\\.js\\'")))
 
 ;; nix
-(setup (:package-or-local nix-mode)
+(setup (:local-or-package nix-mode)
   (defconst nix-electric-pairs
     '(("let" . " in")
       (?= . ";")))
