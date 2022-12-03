@@ -156,10 +156,7 @@ the first PACKAGE."
 
 (setup (:package consult)
   (require 'consult)
-  ;; disable automatic previews in consult commands
-  (consult-customize consult-register consult-buffer :preview-key (kbd "M-."))
-  (:global [remap switch-to-buffer] #'consult-buffer
-           "C-c s" #'consult-line
+  (:global "C-c s" #'consult-line
            "C-c S" #'consult-ripgrep
            "C-c y" #'consult-yank-from-kill-ring))
 
