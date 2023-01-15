@@ -200,29 +200,6 @@ the first PACKAGE."
 ;; calendar
 (set! calendar-week-start-day 1
       calendar-date-style 'iso)
-(set! calendar-holidays
-      '((holiday-fixed 1 1      "Neujahr")
-        (holiday-fixed 1 6      "Heilige Drei Könige")
-        (holiday-fixed 10 3     "Tag der Deutschen Einheit")
-        (holiday-float 12 0 -4  "1. Advent" 24)
-        (holiday-float 12 0 -3  "2. Advent" 24)
-        (holiday-float 12 0 -2  "3. Advent" 24)
-        (holiday-float 12 0 -1  "4. Advent" 24)
-        (holiday-fixed 12 25    "1. Weihnachtstag")
-        (holiday-fixed 12 26    "2. Weihnachtstag")
-        (holiday-easter-etc -48 "Rosenmontag")
-        (holiday-easter-etc -3  "Gründonnerstag")
-        (holiday-easter-etc  -2 "Karfreitag")
-        (holiday-easter-etc   0 "Ostersonntag")
-        (holiday-easter-etc  +1 "Ostermontag")
-        (holiday-easter-etc +39 "Christi Himmelfahrt")
-        (holiday-easter-etc +49 "Pfingstsonntag")
-        (holiday-easter-etc +50 "Pfingstmontag")
-        (holiday-easter-etc +60 "Fronleichnam")
-        (holiday-fixed 8 15     "Mariä Himmelfahrt")
-        (holiday-fixed 11 1     "Allerheiligen")
-        (holiday-float 11 3 1   "Buß- und Bettag" 16))
-      calendar-mark-holidays-flag t)
 
 ;; dired
 
@@ -239,6 +216,42 @@ the first PACKAGE."
            eshell-hist-ignoredups t
            eshell-error-if-no-glob t)
   (:global "C-c t" #'local/eshell-new))
+
+;; mail
+(setup gnus
+  (:option gnus-select-method '(nnnil)
+           gnus-parameters
+           '(("^nnimap"
+              (gcc-self . t)
+              (gnus-use-scoring . nil)
+              (display . nil)
+              (agent-predicate . always)))
+           gnus-summary-line-format "%U%R%z%I%(%[%-23,23f%]%) %s\n"
+           mm-discouraged-alternatives '("text/html" "text/richtext")
+           gnus-secondary-select-methods
+           '((nntp "gmane" (nntp-address "news.gmane.io"))
+             (nnimap "uni"
+                     (gnus-search-engine gnus-search-imap)
+                     (nnimap-user "florian.guthmann@fau.de")
+                     (nnimap-address "faumail.fau.de")
+                     (nnimap-stream starttls))
+             (nnimap "personal"
+                     (gnus-search-engine gnus-search-imap)
+                     (nnimap-user "flogth@mailbox.org")
+                     (nnimap-address "imap.mailbox.org")
+                     (nnimap-stream starttls)))
+           mail-user-agent 'gnus-user-agent
+           user-mail-address "flogth@mailbox.org"
+           user-full-name "Florian Guthmann"
+           message-server-alist
+           '(("florian.guthmann@fau.de" . "smtp faumail.fau.de 587"))
+           send-mail-function #'smtpmail-send-it
+           smtpmail-smtp-server "smtp.mailbox.org"
+           smtpmail-stream-type 'starttls
+           smtpmail-smtp-service 587)
+  (:hook #'gnus-topic-mode
+         #'hl-line-mode)
+  (:global "C-c m" #'gnus))
 
 ;;; development ============================================
 
