@@ -310,19 +310,21 @@
 
 ;; LaTeX
 (setup (:package auctex)
-  (:hook #'visual-line-mode
-         #'TeX-fold-mode
-         #'LaTeX-math-mode
-         #'reftex-mode
-         #'flymake-mode)
   (:option TeX-master 'dwim
            TeX-auto-save t
            TeX-parse-self t
+           preview-auto-cache-preamble t
            TeX-electric-math '("$" . "$")
            TeX-electric-sub-and-superscript t
            LaTeX-electric-left-right-brace t
            reftex-enable-partial-scans t
-           reftex-plug-into-AUCTeX t))
+           reftex-plug-into-AUCTeX t)
+
+  (:hook #'visual-line-mode
+         #'TeX-fold-mode
+         #'LaTeX-math-mode
+         #'reftex-mode
+         #'flymake-mode))
 
 ;; org
 (setup (:package org )
