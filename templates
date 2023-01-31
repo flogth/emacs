@@ -38,6 +38,9 @@ emacs-lisp-mode
 (rec "(letrec (" p ")" n> r> ")")
 (command "(defun " p " (" p ")\n  \"" p "\"" n> "(interactive)" n> r> ")")
 
+racket-mode
+(ll "(link #:href \"" (p "href" "href") "\"" n>
+      "#:title \"" (p "title" "title") "\")")
 eshell-mode
 
 (for "for " (p "i") " in " p " { " p " }")
@@ -90,3 +93,8 @@ org-mode
 (src "#+begin_src " p n> r> n> "#+end_src")
 (elisp "#+begin_src emacs-lisp" n> r> n "#+end_src"
        :post (progn (tempel-done) (org-edit-src-code)))
+
+;; Local Variables:
+;; mode: lisp-data
+;; outline-regexp: "[a-z]"
+;; End:

@@ -174,19 +174,20 @@
 
 ;; snippets
 (setup (:package tempel)
+  (require 'tempel)
   (defun tempel-setup-capf ()
     "Setup tempel as a capf backend."
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand
                       completion-at-point-functions)))
+
   (:bind-into tempel-map
     "TAB" #'tempel-next)
   (:global
    "M-+" #'tempel-expand
-   "M-*" #'tempel-insert))
-
-(add-hook 'prog-mode-hook #'tempel-setup-capf)
-(add-hook 'text-mode-hook #'tempel-setup-capf)
+   "M-*" #'tempel-insert)
+  (add-hook 'prog-mode-hook #'tempel-setup-capf)
+  (add-hook 'text-mode-hook #'tempel-setup-capf))
 
 ;; help
 (set! help-window-select t)
