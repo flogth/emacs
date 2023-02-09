@@ -74,15 +74,19 @@
 (window-divider-mode)
 
 ;; theme
-(setup (:package modus-themes)
-  (:option modus-themes-italic-constructs t
-           modus-themes-bold-constructs t
-           modus-themes-region '(accented)
-           modus-themes-mode-line '(accented borderless)
-           modus-themes-tabs-accented t
-           modus-themes-paren-match '(intense bold))
+(setup modus-themes
+  (require 'modus-themes)
+  (:option
+   modus-themes-variable-pitch-ui nil
+   modus-themes-common-palette-overrides
+   `((border-mode-line-active unspecified)
+     (border-mode-line-inactive unspecified)
+     ,@modus-themes-preset-overrides-intense)
+   modus-operandi-palette-overrides '((comment green-cooler)
+                                      (proof-locked-face bg-green-subtle))
+   modus-themes-bold-constructs t
+   modus-themes-italic-constructs t)
   (load-theme 'modus-operandi t)
-
   (custom-set-faces
    '(default ((t (:weight regular :height 140 :family "JuliaMono"))))
    '(mode-line ((t (:background nil))))
