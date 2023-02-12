@@ -83,10 +83,12 @@
      (border-mode-line-inactive unspecified)
      ,@modus-themes-preset-overrides-intense)
    modus-operandi-palette-overrides '((comment green-cooler)
+                                      (fg-prompt cyan-intense)
                                       (proof-locked-face bg-green-subtle))
    modus-themes-bold-constructs t
-   modus-themes-italic-constructs t)
-  (load-theme 'modus-operandi t)
+   modus-themes-italic-constructs t
+   modus-themes-prompts '(bold))
+  (load-theme 'modus-vivendi t)
   (custom-set-faces
    '(default ((t (:weight regular :height 140 :family "JuliaMono"))))
    '(mode-line ((t (:background nil))))
@@ -97,9 +99,12 @@
   (:option display-time-mode t
            display-time-24hr-format t
            display-time-default-load-average nil)
+  (require 'mood-line)
   (mood-line-mode))
 
 (column-number-mode t)
+
+(winner-mode t)
 
 ;;; editor =================================================
 (set! tab-width 4
