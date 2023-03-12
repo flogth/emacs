@@ -79,9 +79,7 @@
   (:option
    modus-themes-variable-pitch-ui nil
    modus-themes-common-palette-overrides
-   `((border-mode-line-active unspecified)
-     (border-mode-line-inactive unspecified)
-     ,@modus-themes-preset-overrides-intense)
+   `(,@modus-themes-preset-overrides-intense)
    modus-operandi-palette-overrides '((comment green-cooler)
                                       (fg-prompt cyan-intense)
                                       (proof-locked-face bg-green-subtle))
@@ -91,16 +89,58 @@
   (load-theme 'modus-vivendi t)
   (custom-set-faces
    '(default ((t (:weight regular :height 140 :family "JuliaMono"))))
-   '(mode-line ((t (:background nil))))
    '(fixed-pitch ((t (:family (face-attribute 'default :family)))))))
 
 ;; modeline
-(setup (:package mood-line)
-  (:option display-time-mode t
-           display-time-24hr-format t
-           display-time-default-load-average nil)
-  (require 'mood-line)
-  (mood-line-mode))
+(defun local/mode-line-modified ()
+  "Mode line segment for buffer state."
+  (or (if (buffer-file-name (buffer-base-buffer))
+          (cond
+           ((buffer-modified-p)
+            (propertize "● " 'face 'custom-set))
+           (buffer-read-only
+            (propertize "■ " 'face 'mode-line))))
+      "  "))
+
+(defconst mode-line-modal-alist
+  '((normal .  ("[N]" . font-lock-variable-name-face))
+    (insert .  ("[I]" . font-lock-string-face))
+    (visual .  ("[V]" . font-lock-keyword-face))
+    (replace . ("[R]" . font-lock-type-face))
+    (motion .  ("[M]" . font-lock-constant-face))
+    (beacon .  ("[B]" . font-lock-builtin-face))))
+
+(defun local/mode-line-modal ()
+  "Mode line segment for meow mode."
+  (when (boundp 'meow--current-state)
+    (let ((m (alist-get meow--current-state
+                        mode-line-modal-alist)))
+      (propertize (car m) 'face (cdr m)))))
+
+(defun local/mode-line-format (left right)
+  (concat left
+          " "
+          (propertize
+           " "
+           'display `((space :align-to
+                             (- right
+                                (- 0 right-margin)
+                                ,(length right)))))
+          right))
+
+(setq-default mode-line-format
+      '((:eval
+         (local/mode-line-format
+          (format-mode-line
+           '((:eval (format-mode-line (local/mode-line-modified)))
+             mode-line-buffer-identification
+             (:eval (format-mode-line (local/mode-line-modal)))
+             " (%l,%c)"))
+          (format-mode-line
+           '((:eval current-input-method-title)
+             " "
+             (:eval mode-name)
+             (:eval mode-line-end-spaces)))))))
 
 (column-number-mode t)
 
