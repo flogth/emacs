@@ -1,17 +1,12 @@
-;; init --- My personal init -*- lexical-binding: t; -*-
+;; init --- My personal config -*- lexical-binding: t; -*-
 ;;; Commentary:
 
 ;;; Code:
 ;;; functions for configuration ============================
-(eval-when-compile
-  (require 'package)
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-  (package-initialize)
-  (require 'setup))
-
 (unless (package-installed-p 'setup)
   (package-install 'setup))
 
+(require 'setup)
 (setup-define :load-after
   (lambda (&rest features)
     (let ((body `(require ',(setup-get 'feature))))
@@ -48,9 +43,9 @@
   (load custom-file))
 
 ;; backups
-(setq backup-directory-alist
-      `(("." . ,(expand-file-name ".backups" user-emacs-directory))))
-(set! auto-save-default nil
+(set! backup-directory-alist
+      `(("." . ,(expand-file-name ".backups" user-emacs-directory)))
+      auto-save-default nil
       backup-by-copying t
       delete-old-versions t
       create-lockfiles nil)
@@ -75,11 +70,8 @@
 
 ;; theme
 (setup modus-themes
-  (require 'modus-themes)
   (:option
    modus-themes-variable-pitch-ui nil
-   modus-themes-common-palette-overrides
-   `(,@modus-themes-preset-overrides-intense)
    modus-operandi-palette-overrides '((comment green-cooler)
                                       (fg-prompt cyan-intense)
                                       (proof-locked-face bg-green-subtle))
@@ -112,10 +104,11 @@
 
 (defun local/mode-line-modal ()
   "Mode line segment for meow mode."
-  (when (boundp 'meow--current-state)
+  (if (boundp 'meow--current-state)
     (let ((m (alist-get meow--current-state
                         mode-line-modal-alist)))
-      (propertize (car m) 'face (cdr m)))))
+      (propertize (car m) 'face (cdr m)))
+    ""))
 
 (defun local/mode-line-format (left right)
   (concat left
@@ -132,7 +125,7 @@
       '((:eval
          (local/mode-line-format
           (format-mode-line
-           '((:eval (format-mode-line (local/mode-line-modified)))
+           '((:eval (format-mode-line (local/mode-line-modified) ))
              mode-line-buffer-identification
              (:eval (format-mode-line (local/mode-line-modal)))
              " (%l,%c)"))
@@ -187,7 +180,6 @@
            vertico-resize nil)
   (vertico-mode))
 
-
 (setup (:package corfu)
   (require 'corfu)
   (:option corfu-auto t
@@ -210,7 +202,7 @@
 (setup (:package marginalia)
   (:option marginalia-mode t))
 
-(setup (:package savehist recentf)
+(setup
   ;; history
   (:option savehist-mode t
            history-delete-duplicates t
@@ -221,23 +213,6 @@
   ;; position in files
   (:option save-place-mode t))
 
-;; snippets
-(setup (:package tempel)
-  (require 'tempel)
-  (defun tempel-setup-capf ()
-    "Setup tempel as a capf backend."
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-
-  (:bind-into tempel-map
-    "TAB" #'tempel-next)
-  (:global
-   "M-+" #'tempel-expand
-   "M-*" #'tempel-insert)
-  (add-hook 'prog-mode-hook #'tempel-setup-capf)
-  (add-hook 'text-mode-hook #'tempel-setup-capf))
-
 ;; help
 (set! help-window-select t)
 
@@ -247,7 +222,6 @@
       calendar-date-style 'iso)
 
 ;; dired
-
 (setup dired
   (:option dired-dwim-target t
            dired-listing-switches "-NAhl --group-directories-first"))
@@ -292,14 +266,13 @@
            '(("florian.guthmann@fau.de" . "smtp faumail.fau.de 587"))
            send-mail-function #'smtpmail-send-it
            smtpmail-smtp-server "smtp.mailbox.org"
-           smtpmail-stream-type 'starttls
-           smtpmail-smtp-service 587)
+           smtpmail-stream-type 'ssl
+           smtpmail-smtp-service 465)
   (:hook #'gnus-topic-mode
          #'hl-line-mode)
   (:global "C-c m" #'gnus))
 
 ;;; development ============================================
-
 (setup prog-mode
   (:hook #'display-line-numbers-mode
          #'hs-minor-mode))
@@ -331,7 +304,7 @@
   (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter))
 
 ;; ide
-(setup (:package eglot)
+(setup eglot
   (:option eglot-autoshutdown t
            eldoc-echo-area-use-multiline-p nil
            eldoc-idle-delay 0.2
@@ -347,16 +320,17 @@
   ;; xref
   (:option xref-search-program 'ripgrep))
 
+(setup outline-minor-mode
+  (:option outline-minor-mode-cycle t)
+  (:hook-into text-mode lisp-data-mode))
+
 ;;; prose languages ========================================
 ;; HTML
+(setup (:package web-mode)
+  (:file-match "\\.html?\\'"))
 
-(setup (:package web-mode rainbow-mode)
-  (:with-mode web-mode
-    (:file-match "\\.html?\\'"))
-  (require 'rainbow-mode)
-  (:with-mode rainbow-mode
-    (:load-after flymake-mode)
-    (:hook-into prog-mode)))
+(setup (:package rainbow-mode)
+  (:hook-into prog-mode))
 
 ;; LaTeX
 (setup (:package auctex)
@@ -413,8 +387,6 @@
 (setup (:package org-superstar)
   (:hook-into org-mode))
 
-
-
 ;;; programming languages ==================================
 ;; agda
 (setup agda2-mode
@@ -428,26 +400,21 @@
 (setup (:package gnu-apl-mode)
   (:option gnu-apl-show-tips-on-start nil))
 
-(setup (:if-package bqn-mode)
-  (require 'bqn-mode)
-  (setq bqn-interpreter-path "cbqn"))
-
 ;; c/c++
 (setup cc-mode
   (:load-after eglot)
   (:hook #'eglot-ensure))
 
 ;; coq
-(defun local/setup-pg-faces ()
-  "Setup faces for Proof General."
-  ;; thanks david
-  (set-face-background 'proof-locked-face "#90ee90"))
-
-(defun local/coq-init ()
-  "Some initializations for 'coq-mode'."
-  (setq-local tab-width proof-indent))
-
 (setup (:package proof-general)
+  (defun local/setup-pg-faces ()
+    "Setup faces for Proof General."
+    ;; thanks david
+    (set-face-background 'proof-locked-face "#90ee90"))
+
+  (defun local/coq-init ()
+    "Some initializations for `coq-mode'."
+    (setq-local tab-width proof-indent))
   (:option proof-splash-enable nil
            proof-three-window-enable t
            proof-three-window-mode-policy 'smart)
@@ -466,12 +433,6 @@
   (:hook-into scheme-mode
               racket-mode))
 
-(setup (:package eros)
-  (:with-mode emacs-lisp-mode
-    (:hook #'eros-mode))
-  (:with-mode lisp-mode
-    (:hook #'eros-mode)))
-
 ;; haskell
 (setup (:package haskell-mode)
   (:load-after eglot)
@@ -483,13 +444,8 @@
 (setup antlr-mode
   (:file-match "\\.g4\\'"))
 
-;; js
-(setup (:package js2-mode json-mode)
-  (:with-mode js2-mode
-    (:file-match "\\.js\\'")))
-
 ;; nix
-(setup (:if-package nix-mode)
+(setup (:package nix-mode)
   (defconst nix-electric-pairs
     '(("let" . " in")
       (?= . ";")))
@@ -507,13 +463,11 @@
                         electric-pair-text-pairs electric-pair-pairs)))
 
 ;; prolog
-(setup (:package prolog ediprolog)
-  (:file-match "\\.pl\\'")
-  (:option prolog-system 'scryer
-           ediprolog-system 'scryer))
+(setup prolog
+  (:file-match "\\.pl\\'"))
 
 ;; rust
-(setup (:package rust-mode cargo)
+(setup (:package rust-mode)
   (:load-after eglot)
   (:with-mode rust-mode
     (:hook #'eglot-ensure)))
@@ -550,14 +504,6 @@
            (n (- max-column col)))
       (if (> n 0)
           (insert (make-string n char))))))
-
-(defun local/unix-epoch-show (point)
-  "Convert unix epoch at POINT to timestamp and show in overlay."
-  (interactive "d")
-  (let* ((time-unix (seconds-to-time (thing-at-point 'number)))
-         (time-zone "UTC")
-         (time-str (format-time-string "%Y-%m-%d %a %H:%M:%S" time-unix time-zone) ))
-    (eros--eval-overlay time-str (point))))
 
 (defun local/indent-buffer ()
   "Reformat the whole buffer."
@@ -601,7 +547,9 @@
   (kill-buffer nil))
 
 (defun local/wrap-region (start end c replace)
-  "Wrap region from START to END in (car C) and (cdr c).  If REPLACE is non-nil, replace the first and last characters in region."
+  "Wrap region from START to END in (car C) and (cdr c).
+If REPLACE is non-nil, replace the first and last characters in
+region."
   (save-restriction
     (narrow-to-region start end)
     (goto-char (point-min))
@@ -614,20 +562,25 @@
     (insert-char (cdr c))))
 
 (defun local/replace-round (start end arg)
-  "Wrap region from START to END in parentheses, replacing the first and last characters.  With prefix argument ARG, simply wrap the region."
+  "Wrap region from START to END in parentheses.
+Replaces the first and last characters.  With prefix argument
+ARG, simply wrap the region."
   (interactive "*r\nP")
-  (local/wrap-region start end '(?( . ?) ) (not arg)))
+  (local/wrap-region start end '(?\( . ?\) ) (not arg)))
 
 (defun local/replace-curly (start end arg)
-  "Wrap region from START to END in curly braces, replacing the first and last characters.  With prefix argument ARG, simply wrap the region."
+  "Wrap region from START to END in curly braces.
+Replaces the first and last characters.  With prefix argument
+ARG, simply wrap the region."
   (interactive "*r\nP")
-  (local/wrap-region start end '(?{ . ?} ) (not arg)))
+  (local/wrap-region start end '(?\{ . ?\} ) (not arg)))
 
 (defun local/replace-square (start end arg)
-  "Wrap region from START to END in square brackets, replacing the first and last characters.  With prefix argument ARG, simply wrap the region."
+  "Wrap region from START to END in square brackets.
+Replaces the first and last characters.  With prefix argument
+ARG, simply wrap the region."
   (interactive "*r\nP")
-  (local/wrap-region start end '(?[ . ?] ) (not arg)))
-
+  (local/wrap-region start end '(?\[ . ?\] ) (not arg)))
 
 ;;; registers ==============================================
 
@@ -642,8 +595,6 @@
 (global-set-key (kbd "M-{") #'local/replace-curly)
 (global-set-key (kbd "M-[") #'local/replace-square)
 (global-set-key (kbd "M-)") #'delete-pair)
-
-
 
 (setup (:package meow)
   (require 'meow)
