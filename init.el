@@ -15,14 +15,18 @@
       body))
   :documentation "Load the current feature after FEATURES.")
 
-;; load local packages
-(let ((default-directory (locate-user-emacs-file "lisp")))
-  (normal-top-level-add-subdirs-to-load-path))
-
 (defmacro set! (&rest args)
   "Macro for setting user options.  `setq'-like ARGS."
   (declare (debug setq))
   `(setup (:option ,@args)))
+
+(defun local/load-libraries ()
+  "Load local libraries in `site-lisp' directory."
+  (interactive)
+  (dolist (d (directory-files (locate-user-emacs-file "site-lisp") t "^[^.]"))
+    (when (file-directory-p d)
+      (add-to-list 'load-path d))))
+(local/load-libraries)
 
 ;;; basic settings =========================================
 (set! inhibit-startup-message t
