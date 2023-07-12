@@ -58,6 +58,10 @@
       recentf-mode t
       save-place-mode t)
 
+(set! backup-by-copying t
+      backup-directory-alist '((".*" . "~/.local/share/backup"))
+      auto-save-file-name-transforms '((".*" "~/.local/share/auto-save" t)))
+
 (setup elec-pair
   (set! electric-pair-mode t
         delete-pair-blink-delay 0))
@@ -124,6 +128,12 @@
                      (nnimap-user "flogth@mailbox.org")
                      (nnimap-address "imap.mailbox.org")
                      (nnimap-stream starttls)))
+           gnus-posting-styles
+           '(("" (gcc "nnimap+personal:Sent"))
+             ((header "to" "fau.de")
+              (gcc "nnimap+uni:Sent"))
+             ((header "from" "fau.de")
+              (gcc "nnimap+uni:Sent")))
            mail-user-agent 'gnus-user-agent
            user-mail-address "flogth@mailbox.org"
            user-full-name "Florian Guthmann"
@@ -221,6 +231,8 @@
   (set! gnu-apl-show-tips-on-start nil))
 
 (setup (:if-package proof-general)
+  (require 'proof)
+  (set-face-background 'proof-locked-face "#90ee90")
   (set! proof-splash-enable nil
         proof-three-window-enable t
         proof-three-window-mode-policy 'smart))
@@ -238,9 +250,15 @@
 (setup (:if-package nix-mode)
   (:file-match "\\.nix\\'"))
 
-(setup prolog
-  (:file-match "\\.pl\\'"))
+(setup (:if-package sweeprolog)
+  (:file-match "\\.pl\\'")
+  (:hook #'sweeprolog-electric-layout-mode
+         #'sweeprolog-forward-hole-on-tab-mode))
 
+(setup (:package sly)
+  (set! inferior-lisp-program "sbcl"
+        sly-contribs '(sly-fancy sly-tramp))
+  (:hook-into lisp-mode))
 ;;; keybindings
 (set-register ?d '(file . "~/.dotfiles"))
 (set-register ?U '(file . "/ssh:uni:.www/"))
@@ -250,6 +268,8 @@
 (global-set-key (kbd "C-c r") #'consult-recent-file)
 (global-set-key (kbd "C-c C-f") #'consult-flymake)
 
-  
+(global-set-key (kbd "M-[") #'insert-pair)
+(global-set-key (kbd "M-)") #'delete-pair)
+
 (provide 'init)
 ;;; init.el ends here
