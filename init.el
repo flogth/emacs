@@ -28,6 +28,7 @@
       frame-resize-pixelwise t
       pixel-scroll-mode t
       pixel-scroll-precision-mode t
+      scroll-conservatively 128
       use-short-answers t)
 
 (set! custom-file (locate-user-emacs-file "custom.el"))
@@ -104,45 +105,56 @@
       calendar-week-start-day 1)
 
 (setup dired
-  (set! dired-dwim-target t))
+  (set! dired-dwim-target t)
+  (:bind "C-c i" #'image-dired))
 
 (setup gnus
   (set! gnus-select-method '(nnnil)
-           gnus-parameters
-           '(("^nnimap"
-              (gcc-self . t)
-              (gnus-use-scoring . nil)
-              (display . nil)
-              (agent-predicate . always)))
-           gnus-summary-line-format "%U%R%z%I%(%[%-23,23f%]%) %s\n"
-           mm-discouraged-alternatives '("text/html" "text/richtext")
-           gnus-secondary-select-methods
-           '((nntp "gmane" (nntp-address "news.gmane.io"))
-             (nnimap "uni"
-                     (gnus-search-engine gnus-search-imap)
-                     (nnimap-user "florian.guthmann@fau.de")
-                     (nnimap-address "faumail.fau.de")
-                     (nnimap-stream starttls))
-             (nnimap "personal"
-                     (gnus-search-engine gnus-search-imap)
-                     (nnimap-user "flogth@mailbox.org")
-                     (nnimap-address "imap.mailbox.org")
-                     (nnimap-stream starttls)))
-           gnus-posting-styles
-           '(("" (gcc "nnimap+personal:Sent"))
-             ((header "to" "fau.de")
-              (gcc "nnimap+uni:Sent"))
-             ((header "from" "fau.de")
-              (gcc "nnimap+uni:Sent")))
-           mail-user-agent 'gnus-user-agent
-           user-mail-address "flogth@mailbox.org"
-           user-full-name "Florian Guthmann"
-           message-server-alist
-           '(("florian.guthmann@fau.de" . "smtp faumail.fau.de 587"))
-           send-mail-function #'smtpmail-send-it
-           smtpmail-smtp-server "smtp.mailbox.org"
-           smtpmail-stream-type 'ssl
-           smtpmail-smtp-service 465)
+        gnus-parameters
+        '(("^nnimap"
+           (gcc-self . t)
+           (gnus-use-scoring . nil)
+           (display . nil)
+           (agent-predicate . always)))
+        gnus-summary-line-format "%U%R%z%I%d%(%[%-23,23f%]%) %s\n"
+        mm-discouraged-alternatives '("text/html" "text/richtext")
+        gnus-secondary-select-methods
+        '((nntp "gmane" (nntp-address "news.gmane.io"))
+          (nnimap "uni"
+                  (gnus-search-engine gnus-search-imap)
+                  (nnimap-user "florian.guthmann@fau.de")
+                  (nnimap-address "faumail.fau.de")
+                  (nnimap-stream starttls))
+          (nnimap "personal"
+                  (gnus-search-engine gnus-search-imap)
+                  (nnimap-user "flogth@mailbox.org")
+                  (nnimap-address "imap.mailbox.org")
+                  (nnimap-stream starttls)))
+        gnus-posting-styles
+        '(("" (gcc "nnimap+personal:Sent"))
+          ((header "to" "fau.de")
+           (gcc "nnimap+uni:Sent"))
+          ((header "from" "fau.de")
+           (gcc "nnimap+uni:Sent")))
+        mail-user-agent 'gnus-user-agent
+        user-mail-address "flogth@mailbox.org"
+        user-full-name "Florian Guthmann"
+        message-server-alist
+        '(("florian.guthmann@fau.de" . "smtp faumail.fau.de 587"))
+        send-mail-function #'smtpmail-send-it
+        smtpmail-smtp-server "smtp.mailbox.org"
+        smtpmail-stream-type 'starttls
+        smtpmail-smtp-service 587
+
+        gnus-summary-line-format "%9{%U%R%z%}%8{│%}%*%(%-23,23f%)%7{║%} %6{%B%} %s\n"
+	    gnus-summary-dummy-line-format "   %(%8{│%}                       %7{║%}%) %6{┏○%}  %S\n"
+	    gnus-sum-thread-tree-indent " "
+	    gnus-sum-thread-tree-root "┏● "
+	    gnus-sum-thread-tree-false-root " ○ "
+	    gnus-sum-thread-tree-single-indent " ● "
+	    gnus-sum-thread-tree-leaf-with-other "┃━▶ "
+	    gnus-sum-thread-tree-vertical "┃"
+	    gnus-sum-thread-tree-single-leaf "┗━━▶ ")
   (:hook #'gnus-topic-mode
          #'hl-line-mode)
   (:global "C-c m" #'gnus))
