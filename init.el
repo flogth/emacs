@@ -70,7 +70,7 @@
 (setup paren
   (set! show-paren-mode t
         show-paren-delay 0
-        show-paren-context-when-offscreen t))
+        show-paren-context-when-offscreen 'overlay))
 
 ;;; Completion
 (setup (:package vertico)
