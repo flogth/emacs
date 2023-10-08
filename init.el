@@ -1,114 +1,156 @@
-;; init --- My personal config -*- lexical-binding: t; -*-
+;;; init.el --- My emacs configuration              -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2023  Florian Guthmann
+
+;; Author: Florian Guthmann <florian.guthmann@fau.de>
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 ;;; Commentary:
+
+;; Da steh ich nun, ich armer Tor!
+;; Und bin so klug als wie zuvor
+
 ;;; Code:
-(unless (package-installed-p 'setup)
-  (package-install 'setup))
 
 (eval-when-compile
-  (package-initialize)
-  (require 'setup))
+  (require 'package)
+  (package-initialize))
 
 (defmacro set! (&rest args)
-  "Macro for setting user options with `setq'-like ARGS."
+  "Set variables using customize with usage of ARGS like `setq'."
   (declare (debug setq))
-  `(setup (:option ,@args)))
+  `(progn
+     ,@(cl-loop for (key value) on args by #'cddr
+                collecting `(customize-set-variable ',key ,value))))
 
-(defun local/load-libraries ()
-  "Load local libraries in `site-lisp' directory."
-  (interactive)
-  (dolist (d (directory-files (locate-user-emacs-file "site-lisp") t "^[^.]"))
+(let* ((site-lisp-dir (file-name-as-directory (locate-user-emacs-file "site-lisp")))
+       (autoload-file (expand-file-name ".auto-site.el" site-lisp-dir))
+       (dirs (directory-files site-lisp-dir t "^[^.]")))
+  (dolist (d dirs)
     (when (file-directory-p d)
-      (add-to-list 'load-path d))))
-(local/load-libraries)
+      (add-to-list 'load-path d)))
+  (loaddefs-generate dirs autoload-file)
+  (load autoload-file))
 
-;;; Miscellaneous settings
-(set! inhibit-startup-screen t
-      visible-bell nil
+(load (set! custom-file (locate-user-emacs-file "custom.el")) t)
+
+;;;; Sane defaults
+(set! inhibit-startup-message t
       window-resize-pixelwise t
       frame-resize-pixelwise t
-      pixel-scroll-mode t
-      pixel-scroll-precision-mode t
-      scroll-conservatively 128
-      use-short-answers t)
+      use-dialog-box nil
+      use-short-answers t
+      visible-bell nil)
 
-(set! custom-file (locate-user-emacs-file "custom.el"))
-(load custom-file t)
+(set! backup-directory-alist '((".*" . "~/.local/share/backup"))
+      backup-by-copying t
+      delete-old-versions t
+      create-lockfiles nil
+      auto-save-default nil)
 
-;;; Appearance and UI
-(set! blink-cursor-mode nil
-      column-number-mode t
-      winner-mode t)
+(set! scroll-margin 1
+      scroll-step 1
+      scroll-conservatively 101
+      scroll-preserve-screen-position t
+      fast-but-imprecise-scrolling t)
 
-(setup modus-themes
-  (set! modus-themes-variable-pitch-ui nil
-        modus-themes-bold-constructs t
-        modus-themes-italic-constructs t)
-  (load-theme 'modus-operandi t)
-  (:global "C-c t" #'modus-themes-toggle))
+(set! help-window-select t)
 
-;;; Basic Editing
+(set! calendar-week-start-day 1
+      calendar-date-style 'iso)
+
+(set! use-package-always-defer t)
+
+;;;; ui
+(require-theme 'modus-themes)
+(set! modus-themes-italic-constructs t
+      modus-themes-bold-constructs t)
+(load-theme 'modus-operandi)
+(global-set-key (kbd "<f5>") #'modus-themes-toggle)
+
+(set! column-number-mode t
+      mode-line-compact t
+      mode-line-percent-position nil)
+
+;;;; basic editing
 (set! tab-width 4
-      indent-tabs-mode nil
+      indent-tabs-mode nil)
 
-      save-interprogram-paste-before-kill t
-      kill-do-not-save-duplicates t
+(set! save-interprogram-paste-before-kill t
+      kill-do-not-save-duplicates)
 
-      savehist-mode t
-      history-delete-duplicates t
-      savehist-save-minibuffer-history t
-      recentf-mode t
-      save-place-mode t)
+(use-package avy
+  :ensure t
+  :bind ("C-z" . avy-goto-word-1))
 
-(set! backup-by-copying t
-      backup-directory-alist '((".*" . "~/.local/share/backup"))
-      auto-save-file-name-transforms '((".*" "~/.local/share/auto-save" t)))
+(use-package elec-pair
+  :hook (after-init . electric-pair-mode))
 
-(setup elec-pair
-  (set! electric-pair-mode t
-        delete-pair-blink-delay 0))
+(use-package paren
+  :hook (after-init . show-paren-mode)
+  :init (set! show-paren-delay 0
+              show-paren-context-when-offscreen 'overlay))
 
-(setup paren
-  (set! show-paren-mode t
-        show-paren-delay 0
-        show-paren-context-when-offscreen 'overlay))
+(use-package vertico
+  :ensure t
+  :hook (after-init . vertico-mode)
+  :bind (:map vertico-map
+              ("C-j" . #'vertico-exit-input))
+  :init (set! vertico-cycle t
+              vertico-resize nil))
 
-;;; Completion
-(setup (:package vertico)
-  (set! vertico-mode t
-        vertico-cycle t
-        vertico-resize nil))
+(use-package corfu
+  :ensure t
+  :hook (prog-mode . corfu-mode)
+  :init (set! corfu-preview-current nil
+              corfu-cycle t
+              corfu-echo-documentation 0.25
+              tab-always-indent 'complete))
 
-(setup (:package corfu)
-  (set! corfu-mode t
-        corfu-auto t
-        corfu-cycle t))
+(use-package consult
+  :ensure t
+  :bind (("C-c s" . #'consult-line)
+         ("C-c S" . #'consult-ripgrep)
+         ("C-c y" . #'consult-yank-from-kill-ring)))
 
-(setup (:package consult)
-  (:global "C-c s" #'consult-line
-           "C-c y" #'consult-yank-from-kill-ring))
+(use-package orderless
+  :ensure t
+  :init (set! completion-styles '(orderless basic)))
 
-(setup (:package orderless)
-  (set! completion-styles '(orderless basic)))
+(use-package savehist
+  :hook (after-init . savehist-mode)
+  :init (set! history-delete-duplicates t
+              history-length 1000
+              savehist-save-minibuffer-history t))
 
-(setup (:package marginalia)
-  (set! marginalia-mode t))
+(use-package saveplace
+  :hook (after-init . save-place-mode))
 
-(setup (:package avy)
-  (:global "C-z" #'avy-goto-word-1))
+(use-package recentf
+  :bind ("C-c C-r" . recentf)
+  :hook (after-init . recentf-mode))
 
-;;; Help
-(set! help-window-select t
-      help-window-keep-selected t)
+;;;; applications
+(use-package dired
+  :init (set! dired-dwim-target t
+              dired-listing-switches "-NAhl --group-directories-first"))
 
-;;; Applications
-(set! calendar-date-style 'iso
-      calendar-week-start-day 1)
-
-(setup dired
-  (set! dired-dwim-target t)
-  (:bind "C-c i" #'image-dired))
-
-(setup gnus
+(use-package gnus
+  :hook (gnus-topic-mode . hl-line-mode)
+  :bind ("C-c m" . gnus)
+  :init
   (set! gnus-select-method '(nnnil)
         gnus-parameters
         '(("^nnimap"
@@ -116,7 +158,7 @@
            (gnus-use-scoring . nil)
            (display . nil)
            (agent-predicate . always)))
-        gnus-summary-line-format "%U%R%z%I%d%(%[%-23,23f%]%) %s\n"
+        gnus-summary-line-format "%U%R%z%I%(%[%-23,23f%]%) %s\n"
         mm-discouraged-alternatives '("text/html" "text/richtext")
         gnus-secondary-select-methods
         '((nntp "gmane" (nntp-address "news.gmane.io"))
@@ -144,144 +186,122 @@
         send-mail-function #'smtpmail-send-it
         smtpmail-smtp-server "smtp.mailbox.org"
         smtpmail-stream-type 'starttls
-        smtpmail-smtp-service 587
+        smtpmail-smtp-service 587))
 
-        gnus-summary-line-format "%9{%U%R%z%}%8{│%}%*%(%-23,23f%)%7{║%} %6{%B%} %s\n"
-	    gnus-summary-dummy-line-format "   %(%8{│%}                       %7{║%}%) %6{┏○%}  %S\n"
-	    gnus-sum-thread-tree-indent " "
-	    gnus-sum-thread-tree-root "┏● "
-	    gnus-sum-thread-tree-false-root " ○ "
-	    gnus-sum-thread-tree-single-indent " ● "
-	    gnus-sum-thread-tree-leaf-with-other "┃━▶ "
-	    gnus-sum-thread-tree-vertical "┃"
-	    gnus-sum-thread-tree-single-leaf "┗━━▶ ")
-  (:hook #'gnus-topic-mode
-         #'hl-line-mode)
-  (:global "C-c m" #'gnus))
+;;;; version control
+(set! vc-follow-symlinks t)
 
-;;; Programming
-(setup prog-mode
-  (:hook #'display-line-numbers-mode))
+(use-package magit
+  :ensure t
+  :bind ("C-c g" . magit-status)
+  :init (set! magit-define-global-key-bindings nil))
 
-;; version control
-(setup (:package magit)
-  (:global "C-c g" #'magit-status))
+(use-package diff-hl
+  :ensure t
+  :hook (prog-mode . diff-hl-mode))
 
-(setup (:package diff-hl)
-  (:hook-into prog-mode))
+;;;; development
+(dolist (m '(display-line-numbers-mode
+             flymake-mode
+             hs-minor-mode))
+  (add-hook 'prog-mode-hook m))
 
-;; compilation
-(setup compilation
-  (set! compilation-scroll-output 'first-error
-        compilation-ask-about-save nil)
-  (:global "C-c b" #'compile))
+(use-package compile
+  :bind ("C-c b" . compile)
+  :init (set! compilation-scroll-output 'first-error
+        compilation-ask-about-save nil))
 
-(setup ansi-color
-  (set! ansi-color-for-compilation-mode t))
+(use-package ansi-color
+  :hook (compilation-filter-hook . ansi-color-compilation-filter)
+  :init (set! ansi-color-for-compilation-mode t))
 
-;; ide
-(setup eglot
-  (set! eglot-autoshutdown t
-        eldoc-idle-delay 0.2)
-  (:bind "C-c a" #'eglot-code-actions
-         "C-c r" #'eglot-rename
-         "C-c f" #'eglot-format))
+(use-package eglot
+  :bind (:map eglot-mode-map
+              ("C-c a" . #'eglot-code-actions)
+              ("C-c r" . #'eglot-rename)
+              ("C-c f" . #'eglot-format))
+  :init (set! eglot-autoshutdown t
+              eglot-confirm-server-initiated-edits 'diff))
 
-(setup flymake
-  (:hook-into prog-mode LaTeX-mode))
+(use-package eldoc
+  :init (set! eldoc-echo-area-use-multiline-p nil
+              eldoc-idle-delay 0.2))
 
-(set! xref-search-program 'ripgrep)
 
-;;; Markup languages
-(setup (:package web-mode)
-  (:file-match "\\.html?\\'"))
+(use-package xref
+  :init (set! xref-search-program 'ripgrep))
 
-(setup (:package auctex)
-  (set! TeX-master 'dwim
-           TeX-auto-save t
-           TeX-parse-self t
-           preview-auto-cache-preamble t
-           TeX-electric-math '("$" . "$")
-           TeX-electric-sub-and-superscript t
-           LaTeX-electric-left-right-brace t
-           reftex-enable-partial-scans t
-           reftex-plug-into-AUCTeX t)
+;;;; markup languages
+(use-package auctex
+  :ensure t
+  :init (set! TeX-master 'dwim
+              TeX-auto-save t
+              TeX-parse-self t
+              preview-auto-cache-preamble t
+              TeX-electric-math '("$" . "$")
+              TeX-electric-sub-and-superscript t
+              LaTeX-electric-left-right-brace t
+              reftex-enable-partial-scans t
+              reftex-plug-into-AUCTeX t)
+  (dolist (m '(visual-line-mode
+               TeX-fold-mode
+               LaTeX-math-mode
+               reftex-mode
+               flymake-mode))
+    (add-hook 'LaTeX-mode-hook m)))
 
-  (:hook #'visual-line-mode
-         #'TeX-fold-mode
-         #'LaTeX-math-mode
-         #'reftex-mode))
+(use-package org
+  :hook ((org-mode . org-indent-mode)
+         (org-mode . visual-line-mode))
+  :init (set! org-pretty-entities nil
+              org-html-doctype "xhtml5"
+              org-html-html5-fancy t
+              org-html-htmlize-output-type 'css))
 
-(setup (:package org )
-  (set! org-ellipsis " ↴"
-        org-highlight-latex-and-related '(latex script entities)
-        org-pretty-entities t
-        org-hide-emphasis-markers nil
-        org-preview-latex-image-directory
-        (expand-file-name
-         "ltxpng"
-         (temporary-file-directory))
-        org-src-window-setup 'current-window
+;;;; programming languages
 
-        org-return-follows-link t
-        org-mouse-1-follows-link t
-        org-link-descriptive t
-        org-html-doctype "xhtml5"
-        org-html-html5-fancy t
-        org-html-htmlize-output-type 'css)
-    (:hook #'org-indent-mode
-         #'visual-line-mode))
+(when (executable-find "agda-mode")
+  (load-file
+   (let ((coding-system-for-read 'utf-8))
+     (shell-command-to-string "agda-mode locate"))))
 
-;;; Programming languages
-(setup (:if-package agda2-mode)
-    (when (executable-find "agda-mode")
-      (load-file (let ((coding-system-for-read 'utf-8))
-                   (shell-command-to-string "agda-mode locate"))))
-    (set! agda2-highlight-face-groups 'default-faces))
+(use-package proof-general
+  :ensure t
+  :init (set! proof-splash-enable nil
+              proof-three-window-enable nil))
 
-(setup (:if-package gnu-apl-mode)
-  (set! gnu-apl-show-tips-on-start nil))
+(use-package gnu-apl-mode
+  :init (set! gnu-apl-show-tips-on-start nil))
 
-(setup (:if-package proof-general)
-  (require 'proof)
-  (set-face-background 'proof-locked-face "#90ee90")
-  (set! proof-splash-enable nil
-        proof-three-window-enable t
-        proof-three-window-mode-policy 'smart))
+(use-package nix-mode
+  :ensure t
+  :mode "\\.nix\\'")
 
-(setup (:if-package sly)
-  (:hook-into lisp-mode))
+(use-package sly
+  :ensure t
+  :hook (lisp-mode . sly)
+  :init (set! inferiour-lisp-program "sbcl"))
 
-(setup (:if-package haskell-mode)
-  (set! haskell-completing-read-function #'completing-read)
-  (:hook #'interactive-haskell-mode))
+(use-package haskell-mode
+  :ensure t
+  :hook (haskell-mode . interactive-haskell-mode)
+  :init (set! haskell-completing-read-function #'completing-read))
 
-(setup (:if-package antlr-mode)
-  (:file-match "\\.g4\\'"))
+(use-package sweeprolog
+  :ensure t
+  :mode "\\.pl\\'"
+  :hook (sweeprolog-mode . sweeprolog-electric-layout-mode))
 
-(setup (:if-package nix-mode)
-  (:file-match "\\.nix\\'"))
-
-(setup (:if-package sweeprolog)
-  (:file-match "\\.pl\\'")
-  (:hook #'sweeprolog-electric-layout-mode
-         #'sweeprolog-forward-hole-on-tab-mode))
-
-(setup (:package sly)
-  (set! inferior-lisp-program "sbcl"
-        sly-contribs '(sly-fancy sly-tramp))
-  (:hook-into lisp-mode))
-;;; keybindings
-(set-register ?d '(file . "~/.dotfiles"))
-(set-register ?U '(file . "/ssh:uni:.www/"))
-(set-register ?u '(file . "~/data/uni/lv"))
-(set-register ?b '(file . "/ssh:blog:~"))
-
-(global-set-key (kbd "C-c r") #'consult-recent-file)
-(global-set-key (kbd "C-c C-f") #'consult-flymake)
+;;;; keybindings
+(set! repeat-mode t)
 
 (global-set-key (kbd "M-[") #'insert-pair)
 (global-set-key (kbd "M-)") #'delete-pair)
+
+;;;; miscellaneous
+(set-register ?d '(file . "~/.dotfiles"))
+(set-register ?U '(file . "/ssh:uni:~"))
+(set-register ?u '(file . "~/data/uni"))
 
 (provide 'init)
 ;;; init.el ends here
