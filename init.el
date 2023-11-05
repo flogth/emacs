@@ -36,13 +36,14 @@
                 collecting `(customize-set-variable ',key ,value))))
 
 (let* ((site-lisp-dir (file-name-as-directory (locate-user-emacs-file "site-lisp")))
-       (autoload-file (expand-file-name ".auto-site.el" site-lisp-dir))
        (dirs (directory-files site-lisp-dir t "^[^.]")))
   (dolist (d dirs)
     (when (file-directory-p d)
-      (add-to-list 'load-path d)))
-  (loaddefs-generate dirs autoload-file)
-  (load autoload-file))
+      (let ((autoload-file (expand-file-name ".auto-site.el" d)))
+        (add-to-list 'load-path d)
+        (loaddefs-generate d autoload-file nil nil nil t)
+        (byte-recompile-directory d)
+        (load autoload-file)))))
 
 (load (set! custom-file (locate-user-emacs-file "custom.el")) t)
 
@@ -148,7 +149,8 @@
               dired-listing-switches "-NAhl --group-directories-first"))
 
 (use-package gnus
-  :hook (gnus-topic-mode . hl-line-mode)
+  :hook ((gnus-mode . gnus-topic-mode)
+         (gnus-mode . hl-line-mode))
   :bind ("C-c m" . gnus)
   :init
   (set! gnus-select-method '(nnnil)
