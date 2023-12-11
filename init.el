@@ -270,7 +270,8 @@
 (use-package proof-general
   :ensure t
   :init (set! proof-splash-enable nil
-              proof-three-window-enable nil))
+              proof-three-window-enable nil
+              proof-script-fly-past-comments t))
 
 (use-package gnu-apl-mode
   :init (set! gnu-apl-show-tips-on-start nil))
