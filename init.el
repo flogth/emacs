@@ -140,8 +140,9 @@
   :hook (after-init . save-place-mode))
 
 (use-package recentf
-  :bind ("C-c C-r" . recentf)
-  :hook (after-init . recentf-mode))
+  :bind ("C-x C-r" . recentf)
+  :init (set! recentf-mode t
+              recentf-max-saved-items 128))
 
 ;;;; applications
 (use-package dired
