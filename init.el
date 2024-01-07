@@ -210,8 +210,8 @@
   (add-hook 'prog-mode-hook m))
 
 (use-package compile
-  :bind ("C-c b" . compile)
-  :init (set! compilation-scroll-output 'first-error
+  :bind ("C-c k" . compile)
+  :init (set! compilation-scroll-output t
         compilation-ask-about-save nil))
 
 (use-package ansi-color
