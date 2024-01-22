@@ -177,6 +177,9 @@
                   (nnimap-stream starttls)))
         gnus-posting-styles
         '(("" (gcc "nnimap+personal:Sent"))
+          ("uni"
+           (address "florian.guthmann@fau.de")
+           (gcc "nnimap+uni:Sent"))
           ((header "to" "fau.de")
            (gcc "nnimap+uni:Sent"))
           ((header "from" "fau.de")
