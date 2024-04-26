@@ -250,7 +250,10 @@
                LaTeX-math-mode
                reftex-mode
                flymake-mode))
-    (add-hook 'LaTeX-mode-hook m)))
+    (add-hook 'LaTeX-mode-hook m)
+    (add-hook 'LaTeX-mode-hook
+            (lambda () (set (make-local-variable 'TeX-electric-math)
+                            (cons "\\(" "\\)"))))))
 
 (use-package org
   :hook ((org-mode . org-indent-mode)
