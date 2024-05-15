@@ -97,24 +97,24 @@
 
 (use-package paren
   :hook (after-init . show-paren-mode)
-  :init (setopt show-paren-delay 0
-              show-paren-context-when-offscreen 'overlay))
+  :custom ((show-paren-delay 0)
+           (show-paren-context-when-offscreen 'overlay)))
 
 (use-package vertico
   :ensure t
   :hook (after-init . vertico-mode)
   :bind (:map vertico-map
               ("C-j" . #'vertico-exit-input))
-  :init (setopt vertico-cycle t
-                vertico-resize nil))
+  :custom ((vertico-cycle t)
+           (vertico-resize nil)))
 
 (use-package corfu
   :ensure t
   :hook (prog-mode . corfu-mode)
-  :init (setopt corfu-preview-current nil
-                corfu-cycle t
-                corfu-echo-documentation 0.25
-                tab-always-indent 'complete))
+  :custom ((corfu-preview-current nil)
+           (corfu-cycle t)
+           (corfu-echo-documentation 0.25)
+           (tab-always-indent 'complete)))
 
 (use-package consult
   :ensure t
@@ -124,71 +124,78 @@
 
 (use-package orderless
   :ensure t
-  :init (setopt completion-styles '(orderless basic)))
+  :custom (completion-styles '(orderless basic)))
 
 (use-package savehist
   :hook (after-init . savehist-mode)
-  :init (setopt history-delete-duplicates t
-              history-length 1000
-              savehist-save-minibuffer-history t))
+  :custom ((history-delete-duplicates t)
+           (history-length 1000)
+           (savehist-save-minibuffer-history t)))
 
 (use-package saveplace
   :hook (after-init . save-place-mode))
 
 (use-package recentf
   :bind ("C-x C-r" . recentf)
-  :init (setopt recentf-mode t
-              recentf-max-saved-items 128))
+  :custom ((recentf-mode t)
+           (recentf-max-saved-items 128)))
 
 ;;;; applications
+(setopt async-shell-command-display-buffer nil)
+
+(use-package pdf-tools
+  :hook ((pdf-view-mode . pdf-tools-enable-minor-modes))
+  :custom ((pdf-annot-activate-created-annotations t))
+  :init (add-to-list 'auto-mode-alist '("\\.[pP][dD][fF]\\'" . pdf-view-mode)))
+
 (use-package dired
-  :init (setopt dired-dwim-target t
-              dired-listing-switches "-NAhl --group-directories-first"))
+  :custom ((dired-dwim-target t)
+           (dired-listing-switches "-NAhl --group-directories-first")))
 
 (use-package gnus
   :hook ((gnus-mode . gnus-topic-mode)
          (gnus-mode . hl-line-mode))
   :bind ("C-c m" . gnus)
-  :init
-  (setopt gnus-select-method '(nnnil)
-          gnus-parameters
-          '(("^nnimap"
-             (gcc-self . t)
-             (gnus-use-scoring . nil)
-             (display . nil)
-             (agent-predicate . always)))
-          gnus-summary-line-format "%U%R%z %d %I%(%[%4L: %-23,23f%]%) %s\n"
-          mm-discouraged-alternatives '("text/html" "text/richtext")
-          gnus-secondary-select-methods
-          '((nntp "gmane" (nntp-address "news.gmane.io"))
-            (nnimap "uni"
-                    (gnus-search-engine gnus-search-imap)
-                    (nnimap-user "florian.guthmann@fau.de")
-                    (nnimap-address "faumail.fau.de")
-                    (nnimap-stream starttls))
-            (nnimap "personal"
-                    (gnus-search-engine gnus-search-imap)
-                    (nnimap-user "flogth@mailbox.org")
-                    (nnimap-address "imap.mailbox.org")
-                    (nnimap-stream starttls)))
-          gnus-posting-styles
-          '(("" (gcc "nnimap+personal:Sent"))
-            ("uni"
-             (address "florian.guthmann@fau.de")
-             (gcc "nnimap+uni:Sent"))
-            ((header "to" "fau.de")
-             (gcc "nnimap+uni:Sent"))
-            ((header "from" "fau.de")
-             (gcc "nnimap+uni:Sent")))
-          mail-user-agent 'gnus-user-agent
-          user-mail-address "flogth@mailbox.org"
-          user-full-name "Florian Guthmann"
-          message-server-alist
-          '(("florian.guthmann@fau.de" . "smtp faumail.fau.de 587"))
-          send-mail-function #'smtpmail-send-it
-          smtpmail-smtp-server "smtp.mailbox.org"
-          smtpmail-stream-type 'starttls
-          smtpmail-smtp-service 587))
+  :custom
+  ((gnus-select-method '(nnnil))
+   (gnus-parameters
+    '(("^nnimap"
+       (gcc-self . t)
+       (gnus-use-scoring . nil)
+       (display . nil)
+       (agent-predicate . always))))
+   (gnus-summary-line-format "%U%R%z %d %I%(%[%4L: %-23,23f%]%) %s\n")
+   (mm-discouraged-alternatives '("text/html" "text/richtext"))
+   (gnus-secondary-select-methods
+    '((nntp "gmane" (nntp-address "news.gmane.io"))
+      (nnimap "uni"
+              (gnus-search-engine gnus-search-imap)
+              (nnimap-user "florian.guthmann@fau.de")
+              (nnimap-address "faumail.fau.de")
+              (nnimap-stream starttls))
+      (nnimap "personal"
+              (gnus-search-engine gnus-search-imap)
+              (nnimap-user "flogth@mailbox.org")
+              (nnimap-address "imap.mailbox.org")
+              (nnimap-stream starttls))))
+   (gnus-posting-styles
+    '(("" (gcc "nnimap+personal:Sent"))
+      ("uni"
+       (address "florian.guthmann@fau.de")
+       (gcc "nnimap+uni:Sent"))
+      ((header "to" "fau.de")
+       (gcc "nnimap+uni:Sent"))
+      ((header "from" "fau.de")
+       (gcc "nnimap+uni:Sent"))))
+   (mail-user-agent 'gnus-user-agent)
+   (user-mail-address "flogth@mailbox.org")
+   (user-full-name "Florian Guthmann")
+   (message-server-alist
+    '(("florian.guthmann@fau.de" . "smtp faumail.fau.de 587")))
+   (send-mail-function #'smtpmail-send-it)
+   (smtpmail-smtp-server "smtp.mailbox.org")
+   (smtpmail-stream-type 'starttls)
+   (smtpmail-smtp-service 587)))
 
 ;;;; version control
 (setopt vc-follow-symlinks t)
@@ -196,7 +203,7 @@
 (use-package magit
   :ensure t
   :bind ("C-c g" . magit-status)
-  :init (setopt magit-define-global-key-bindings nil))
+  :custom (magit-define-global-key-bindings nil))
 
 (use-package diff-hl
   :ensure t
@@ -210,41 +217,42 @@
 
 (use-package compile
   :bind ("C-c k" . compile)
-  :init (setopt compilation-scroll-output t
-        compilation-ask-about-save nil))
+  :custom ((compilation-scroll-output t)
+           (compilation-ask-about-save nil)))
 
 (use-package ansi-color
   :hook (compilation-filter-hook . ansi-color-compilation-filter)
-  :init (setopt ansi-color-for-compilation-mode t))
+  :custom (ansi-color-for-compilation-mode t))
 
 (use-package eglot
   :bind (:map eglot-mode-map
               ("C-c a" . #'eglot-code-actions)
               ("C-c r" . #'eglot-rename)
               ("C-c f" . #'eglot-format))
-  :init (setopt eglot-autoshutdown t
-              eglot-confirm-server-initiated-edits 'diff))
+  :init ((eglot-autoshutdown t)
+         (eglot-confirm-server-initiated-edits 'diff)))
 
 (use-package eldoc
-  :init (setopt eldoc-echo-area-use-multiline-p nil
-                eldoc-idle-delay 0.2))
+  :custom ((eldoc-echo-area-use-multiline-p nil)
+            (eldoc-idle-delay 0.2)))
 
 
 (use-package xref
-  :init (setopt xref-search-program 'ripgrep))
+  :custom (xref-search-program 'ripgrep))
 
 ;;;; markup languages
 (use-package auctex
   :ensure t
-  :init (setopt TeX-master 'dwim
-              TeX-auto-save t
-              TeX-parse-self t
-              preview-auto-cache-preamble t
-              TeX-electric-math '("$" . "$")
-              TeX-electric-sub-and-superscript t
-              LaTeX-electric-left-right-brace t
-              reftex-enable-partial-scans t
-              reftex-plug-into-AUCTeX t)
+  :custom ((TeX-master 'dwim)
+           (TeX-auto-save t)
+           (TeX-parse-self t)
+           (preview-auto-cache-preamble t)
+           (TeX-electric-math '("$" . "$"))
+           (TeX-electric-sub-and-superscript t)
+           (LaTeX-electric-left-right-brace t)
+           (reftex-enable-partial-scans t)
+           (reftex-plug-into-AUCTeX t))
+  :init
   (dolist (m '(visual-line-mode
                TeX-fold-mode
                LaTeX-math-mode
@@ -258,11 +266,11 @@
 (use-package org
   :hook ((org-mode . org-indent-mode)
          (org-mode . visual-line-mode))
-  :init (setopt org-pretty-entities nil
-              org-html-doctype "xhtml5"
-              org-html-html5-fancy t
-              org-html-htmlize-output-type 'css
-              org-export-dispatch-use-expert-ui t))
+  :custom ((org-pretty-entities nil)
+           (org-html-doctype "xhtml5")
+           (org-html-html5-fancy t)
+           (org-html-htmlize-output-type 'css)
+           (org-export-dispatch-use-expert-ui t)))
 
 ;;;; programming languages
 
@@ -273,9 +281,9 @@
 
 (use-package proof-general
   :ensure t
-  :init (setopt proof-splash-enable nil
-              proof-three-window-enable nil
-              proof-script-fly-past-comments t))
+  :custom ((proof-splash-enable nil)
+           (proof-three-window-enable nil)
+           (proof-script-fly-past-comments t)))
 
 (use-package gnu-apl-mode
   :init (setopt gnu-apl-show-tips-on-start nil))
@@ -287,7 +295,7 @@
 (use-package sly
   :ensure t
   :hook (lisp-mode . sly)
-  :init (setopt inferiour-lisp-program "sbcl"))
+  :custom (inferiour-lisp-program "sbcl"))
 
 (use-package haskell-mode
   :ensure t
