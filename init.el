@@ -146,7 +146,9 @@
 (use-package pdf-tools
   :hook ((pdf-view-mode . pdf-tools-enable-minor-modes))
   :custom ((pdf-annot-activate-created-annotations t))
-  :init (add-to-list 'auto-mode-alist '("\\.[pP][dD][fF]\\'" . pdf-view-mode)))
+  :init
+  (add-to-list 'auto-mode-alist '("\\.[pP][dD][fF]\\'" . pdf-view-mode))
+  (add-to-list 'pdf-annot-list-format '(contents . 56)))
 
 (use-package dired
   :custom ((dired-dwim-target t)
