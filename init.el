@@ -140,6 +140,9 @@
   :custom ((recentf-mode t)
            (recentf-max-saved-items 128)))
 
+(use-package hippie-expand
+  :bind ("M-/" . hippie-expand))
+
 ;;;; applications
 (setopt async-shell-command-display-buffer nil)
 
