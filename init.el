@@ -155,7 +155,7 @@
 
 (use-package dired
   :custom ((dired-dwim-target t)
-           (dired-listing-switches "-NAhl --group-directories-first")))
+           (dired-listing-switches "-Ahl")))
 
 (use-package gnus
   :hook ((gnus-mode . gnus-topic-mode)
