@@ -234,8 +234,8 @@
               ("C-c a" . #'eglot-code-actions)
               ("C-c r" . #'eglot-rename)
               ("C-c f" . #'eglot-format))
-  :init ((eglot-autoshutdown t)
-         (eglot-confirm-server-initiated-edits 'diff)))
+  :custom ((eglot-autoshutdown t)
+           (eglot-confirm-server-initiated-edits 'diff)))
 
 (use-package eldoc
   :custom ((eldoc-echo-area-use-multiline-p nil)
