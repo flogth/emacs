@@ -223,7 +223,8 @@
 (use-package compile
   :bind ("C-c k" . compile)
   :custom ((compilation-scroll-output t)
-           (compilation-ask-about-save nil)))
+           (compilation-ask-about-save nil))
+  :init (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter))
 
 (use-package ansi-color
   :hook (compilation-filter-hook . ansi-color-compilation-filter)
