@@ -106,7 +106,12 @@
   :bind (:map vertico-map
               ("C-j" . #'vertico-exit-input))
   :custom ((vertico-cycle t)
-           (vertico-resize nil)))
+           (vertico-resize nil))
+  :init
+  (keymap-set vertico-map "RET" #'vertico-directory-enter)
+  (keymap-set vertico-map "DEL" #'vertico-directory-delete-char)
+  (keymap-set vertico-map "M-DEL" #'vertico-directory-delete-word)
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy))
 
 (use-package corfu
   :ensure t
