@@ -42,18 +42,18 @@
 
 ;;;; Sane defaults
 (setopt inhibit-startup-message t
-      window-resize-pixelwise t
-      frame-resize-pixelwise t
-      use-dialog-box nil
-      use-short-answers t
-      visible-bell nil)
+        window-resize-pixelwise t
+        frame-resize-pixelwise t
+        use-dialog-box nil
+        use-short-answers t
+        visible-bell nil)
 
 (setopt backup-directory-alist '((".*" . "~/.local/share/backup"))
-      tramp-backup-directory-alist backup-directory-alist
-      backup-by-copying t
-      delete-old-versions t
-      create-lockfiles nil
-      auto-save-default nil)
+        tramp-backup-directory-alist backup-directory-alist
+        backup-by-copying t
+        delete-old-versions t
+        create-lockfiles nil
+        auto-save-default nil)
 
 (setopt scroll-margin 1
         scroll-step 1
@@ -66,24 +66,24 @@
 (setopt help-window-select t)
 
 (setopt calendar-week-start-day 1
-      calendar-date-style 'iso)
+        calendar-date-style 'iso)
 
 (setopt use-package-always-defer t)
 
 ;;;; ui
 (require-theme 'modus-themes)
 (setopt modus-themes-italic-constructs t
-      modus-themes-bold-constructs t)
+        modus-themes-bold-constructs t)
 (load-theme 'modus-operandi)
 (global-set-key (kbd "<f5>") #'modus-themes-toggle)
 
 (setopt column-number-mode t
-      mode-line-compact t
-      mode-line-percent-position nil)
+        mode-line-compact t
+        mode-line-percent-position nil)
 
 ;;;; basic editing
 (setopt tab-width 4
-      indent-tabs-mode nil)
+        indent-tabs-mode nil)
 
 (setopt save-interprogram-paste-before-kill t
         kill-do-not-save-duplicates t)
@@ -245,7 +245,7 @@
 
 (use-package eldoc
   :custom ((eldoc-echo-area-use-multiline-p nil)
-            (eldoc-idle-delay 0.2)))
+           (eldoc-idle-delay 0.2)))
 
 
 (use-package xref
@@ -271,8 +271,8 @@
                flymake-mode))
     (add-hook 'LaTeX-mode-hook m)
     (add-hook 'LaTeX-mode-hook
-            (lambda () (set (make-local-variable 'TeX-electric-math)
-                            (cons "\\(" "\\)"))))))
+              (lambda () (set (make-local-variable 'TeX-electric-math)
+                              (cons "\\(" "\\)"))))))
 
 (use-package org
   :hook ((org-mode . org-indent-mode)
